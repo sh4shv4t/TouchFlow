@@ -1,0 +1,25 @@
+{
+  "name": "remote-screen-controller",
+  "version": "1.0.0",
+  "description": "Browser-based remote screen mirroring and touch-based control system using WebRTC",
+  "main": "signaling/server.js",
+  "scripts": {
+    "start": "node signaling/server.js",
+    "dev": "node signaling/server.js"
+  },
+  "keywords": [
+    "webrtc",
+    "screen-sharing",
+    "remote-control",
+    "browser",
+    "touch-gestures"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

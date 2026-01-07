@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Screen Controller - Sender</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Connection Status Panel -->
+    <div class="panel status-panel">
+      <h1>Remote Screen Sender 🖥️</h1>
+      
+      <div class="status-section">
+        <h2>Connection Status</h2>
+        <div id="connectionStatus" class="status-indicator disconnected">
+          <span class="status-dot"></span>
+          <span id="statusText">Disconnected</span>
+        </div>
+        <div id="statusDetails" class="status-details"></div>
+      </div>
+
+      <!-- Configuration -->
+      <div class="config-section">
+        <h2>Configuration</h2>
+        <div class="form-group">
+          <label for="signalingUrl">Signaling Server URL:</label>
+          <input 
+            type="text" 
+            id="signalingUrl" 
+            value="ws://localhost:8080"
+            placeholder="ws://localhost:8080"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label for="sessionId">Session ID (optional):</label>
+          <input 
+            type="text" 
+            id="sessionId" 
+            placeholder="Leave empty for auto-generate"
+          >
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-section">
+        <h2>Controls</h2>
+        <button id="startBtn" class="btn btn-primary">Start Screen Capture</button>
+        <button id="stopBtn" class="btn btn-danger" disabled>Stop Sharing</button>
+        <button id="copySessionBtn" class="btn btn-secondary" disabled>
+          Copy Session ID
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-section">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Video Frames</div>
+            <div id="frameCount" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Bitrate (Mbps)</div>
+            <div id="bitrate" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Scroll Events</div>
+            <div id="scrollCount" class="stat-value">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Connection State</div>
+            <div id="connectionState" class="stat-value">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs -->
+      <div class="logs-section">
+        <h2>Event Log</h2>
+        <div id="logContainer" class="log-container"></div>
+      </div>
+    </div>
+
+    <!-- Video Preview -->
+    <div class="panel video-panel">
+      <h2>Screen Preview</h2>
+      <video id="screenPreview" autoplay muted playsinline></video>
+      <p id="previewPlaceholder" class="placeholder-text">
+        Screen capture will appear here after starting
+      </p>
+    </div>
+  </div>
+
+  <script src="sender.js"></script>
+</body>
+</html>

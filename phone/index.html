@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remote Screen Controller - Receiver</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Main Container -->
+  <div id="mainContainer" class="container">
+    <!-- Connection Setup Panel -->
+    <div id="setupPanel" class="panel setup-panel">
+      <h1>Remote Screen Controller 📱</h1>
+      
+      <div class="setup-content">
+        <p class="instruction-text">
+          Enter the session ID from your laptop sender to begin controlling the remote screen.
+        </p>
+
+        <div id="configDisplay" class="info-box" style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-family: monospace; font-size: 12px;">
+          <strong>Auto-Detected Config:</strong><br>
+          <span id="configText">Loading...</span>
+        </div>
+
+        <div class="form-group">
+          <label for="signalingUrl">Signaling Server URL:</label>
+          <input 
+            type="text" 
+            id="signalingUrl" 
+            placeholder="Auto-detected from current page"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="sessionIdInput">Session ID:</label>
+          <input 
+            type="text" 
+            id="sessionIdInput" 
+            placeholder="Enter session ID from sender"
+          >
+        </div>
+
+        <button id="connectBtn" class="btn btn-primary">Connect to Sender</button>
+
+        <div id="setupStatus" class="status-message"></div>
+
+        <div class="help-section">
+          <h3>How to Use:</h3>
+          <ol>
+            <li>Get the session ID from the sender's laptop</li>
+            <li>Enter it above and click Connect</li>
+            <li>Allow permission for video playback</li>
+            <li>Drag your finger on the screen to scroll</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fullscreen Video Container -->
+    <div id="videoContainer" class="video-container" style="display: none;">
+      <video id="remoteVideo" autoplay playsinline muted></video>
+      
+      <!-- Overlay Controls -->
+      <div class="overlay">
+        <div class="controls">
+          <button id="disconnectBtn" class="btn btn-icon">✕</button>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span id="connectionStatusText">Connected</span>
+          </div>
+          <button id="settingsBtn" class="btn btn-icon">⚙️</button>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="settings-panel" style="display: none;">
+          <h3>Settings</h3>
+          
+          <div class="setting-group">
+            <label for="sensitivitySlider">Scroll Sensitivity:</label>
+            <div class="slider-container">
+              <input 
+                type="range" 
+                id="sensitivitySlider" 
+                min="0.5" 
+                max="3" 
+                step="0.1" 
+                value="1"
+              >
+              <span id="sensitivityValue">1.0x</span>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label for="fullscreenToggle">
+              <input 
+                type="checkbox" 
+                id="fullscreenToggle"
+                checked
+              >
+              Fullscreen
+            </label>
+          </div>
+
+          <button id="closeSettingsBtn" class="btn btn-secondary">Close</button>
+        </div>
+
+        <!-- Touch Feedback -->
+        <div id="touchFeedback" class="touch-feedback"></div>
+      </div>
+
+      <!-- Debug Stats -->
+      <div id="debugStats" class="debug-stats" style="display: none;">
+        <div>Ping: <span id="pingMs">-</span>ms</div>
+        <div>Scroll Events: <span id="scrollEventCount">0</span></div>
+        <div>Connection: <span id="debugConnectionState">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="controller.js"></script>
+</body>
+</html>
