@@ -211,6 +211,31 @@ function handleRegister(ws, peerId, role, updateRole) {
   }));
 
   console.log(`[INFO] Registered: ${peerId} as ${role}`);
+
+  // If this is a receiver, check for stored offers
+  if (role === 'receiver') {
+    // Find a session with a sender offer waiting
+    for (const [sessionId, session] of sessions.entries()) {
+      if (session.sender && !session.receiver) {
+        // Send the stored offer to the receiver
+        session.receiver = {
+          peerId,
+          ws,
+          role: 'receiver'
+        };
+        peers.set(peerId, { ...peers.get(peerId), connectedTo: sessionId });
+        
+        ws.send(JSON.stringify({
+          type: 'offer',
+          from: session.sender.peerId,
+          sessionId: sessionId,
+          offer: session.sender.offer
+        }));
+        console.log(`[INFO] Sent stored offer from ${session.sender.peerId} to receiver ${peerId}`);
+        return;
+      }
+    }
+  }
 }
 
 /**
@@ -252,7 +277,8 @@ function handleOffer(ws, peerId, sessionId, offer, updateRole) {
   session.sender = {
     peerId,
     ws,
-    role: 'sender'
+    role: 'sender',
+    offer: offer  // Store the offer for later sending to receiver
   };
 
   updateRole('sender', session.id);
