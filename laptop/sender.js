@@ -11,8 +11,22 @@
 
 class RemoteScreenSender {
   constructor() {
-    // Configuration
-    this.signalingUrl = 'ws://localhost:8080';
+    // Configuration - Auto-detect signaling server IP
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname;
+    // If loading from file://, use explicit server address
+    let signalingUrl;
+    if (host === '' || host === 'localhost' || host === '127.0.0.1') {
+      // Default to IP if opened from file
+      signalingUrl = `${protocol}//172.22.195.183:8080`;
+    } else {
+      // Use detected host
+      signalingUrl = `${protocol}//${host}:8080`;
+    }
+    this.signalingUrl = signalingUrl;
+    
+    console.log(`🔧 Laptop Signaling URL: ${this.signalingUrl}`);
+    
     this.peerConnection = null;
     this.signalingSocket = null;
     this.dataChannel = null;
@@ -251,24 +265,56 @@ class RemoteScreenSender {
    */
   createPeerConnection() {
     const iceServers = [
+      // STUN servers
       { urls: ['stun:stun.l.google.com:19302'] },
-      { urls: ['stun:stun1.l.google.com:19302'] }
+      { urls: ['stun:stun1.l.google.com:19302'] },
+      { urls: ['stun:stun2.l.google.com:19302'] },
+      { urls: ['stun:stun3.l.google.com:19302'] },
+      { urls: ['stun:stun4.l.google.com:19302'] },
+      // TURN servers - multiple options for fallback
+      { 
+        urls: ['turn:openrelay.metered.ca:80'],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      },
+      { 
+        urls: ['turn:openrelay.metered.ca:443'],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      },
+      {
+        urls: ['turn:relay.metered.ca:80'],
+        username: 'relay',
+        credential: 'relay'
+      },
+      {
+        urls: ['turn:relay.metered.ca:443'],
+        username: 'relay',
+        credential: 'relay'
+      }
     ];
 
     this.peerConnection = new RTCPeerConnection({
       iceServers,
+      iceCandidatePoolSize: 20,
+      iceTransportPolicy: 'all',
+      bundlePolicy: 'max-bundle',
+      rtcpMuxPolicy: 'require',
       encodedInsertableStreams: true,
-      maxPacketLifeTime: 3000
+      maxPacketLifeTime: 5000
     });
 
-    // ICE candidate handling
+    // Log all ICE candidates for debugging
     this.peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
+        this.log('info', `📡 ICE Candidate: ${event.candidate.candidate.substring(0, 60)}...`);
         this.sendSignalingMessage({
           type: 'ice-candidate',
           sessionId: this.sessionId,
           candidate: event.candidate
         });
+      } else {
+        this.log('info', '✅ ICE gathering complete');
       }
     };
 

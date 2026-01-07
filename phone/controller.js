@@ -293,13 +293,54 @@ class RemoteScreenReceiver {
    */
   createPeerConnection() {
     const iceServers = [
+      // STUN servers
       { urls: ['stun:stun.l.google.com:19302'] },
-      { urls: ['stun:stun1.l.google.com:19302'] }
+      { urls: ['stun:stun1.l.google.com:19302'] },
+      { urls: ['stun:stun2.l.google.com:19302'] },
+      { urls: ['stun:stun3.l.google.com:19302'] },
+      { urls: ['stun:stun4.l.google.com:19302'] },
+      // TURN servers - multiple options for fallback
+      { 
+        urls: ['turn:openrelay.metered.ca:80'],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      },
+      { 
+        urls: ['turn:openrelay.metered.ca:443'],
+        username: 'openrelayproject',
+        credential: 'openrelayproject'
+      },
+      {
+        urls: ['turn:relay.metered.ca:80'],
+        username: 'relay',
+        credential: 'relay'
+      },
+      {
+        urls: ['turn:relay.metered.ca:443'],
+        username: 'relay',
+        credential: 'relay'
+      }
     ];
 
     this.peerConnection = new RTCPeerConnection({
-      iceServers
+      iceServers,
+      iceCandidatePoolSize: 20,
+      iceTransportPolicy: 'all',
+      bundlePolicy: 'max-bundle',
+      rtcpMuxPolicy: 'require'
     });
+
+    // Monitor connection state
+    this.peerConnection.onconnectionstatechange = () => {
+      this.log(`🔗 Connection state: ${this.peerConnection.connectionState}`);
+      if (this.peerConnection.connectionState === 'failed') {
+        this.showStatus('Connection failed', 'error');
+      }
+    };
+
+    this.peerConnection.oniceconnectionstatechange = () => {
+      this.log(`❄️ ICE connection state: ${this.peerConnection.iceConnectionState}`);
+    };
 
     // Handle remote stream
     this.peerConnection.ontrack = (event) => {
@@ -342,6 +383,7 @@ class RemoteScreenReceiver {
    */
   async handleOffer(offer) {
     try {
+      this.log('📩 Offer received from sender');
       await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
       this.log('Offer received and set');
 
@@ -356,9 +398,11 @@ class RemoteScreenReceiver {
       });
 
       this.log('Answer sent to sender');
+      this.showStatus('Waiting for video stream...', '');
 
     } catch (error) {
       this.log(`Failed to handle offer: ${error.message}`);
+      this.showStatus(`Offer error: ${error.message}`, 'error');
     }
   }
 

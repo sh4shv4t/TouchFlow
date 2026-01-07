@@ -34,6 +34,38 @@ const server = http.createServer((req, res) => {
         res.end(data);
       }
     });
+  } else if (req.url === '/laptop' || req.url === '/laptop/') {
+    // Serve laptop sender interface
+    const filePath = path.join(__dirname, '../laptop/index.html');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error loading laptop page');
+        console.error('[ERROR] Failed to load laptop/index.html:', err.message);
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+      }
+    });
+  } else if (req.url.startsWith('/laptop/')) {
+    // Serve laptop assets (CSS, JS)
+    const filePath = path.join(__dirname, '../' + req.url);
+    const ext = path.extname(filePath);
+    
+    let contentType = 'text/plain';
+    if (ext === '.css') contentType = 'text/css';
+    if (ext === '.js') contentType = 'application/javascript';
+    if (ext === '.html') contentType = 'text/html';
+    
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
+      } else {
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+      }
+    });
   } else if (req.url.startsWith('/phone/')) {
     // Serve phone assets (CSS, JS)
     const filePath = path.join(__dirname, '../' + req.url);
@@ -67,7 +99,10 @@ const wss = new WebSocket.Server({ server });
 const peers = new Map();
 
 // Session management
-const sessions = new Map(); // Key: sessionId, Value: { sender, receiver }
+const sessions = new Map(); // Key: sessionId, Value: { sender, receiver, dataChannelActive }
+
+// Video relay storage for when P2P fails
+const videoRelayBuffer = new Map(); // Key: sessionId, Value: ArrayBuffer
 
 /**
  * Generate a unique peer ID
@@ -379,7 +414,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅ WebRTC Signaling Server running on ALL interfaces`);
   console.log(`📡 WebSocket URL: ws://${localIP}:${PORT}`);
   console.log(`📋 Health check: http://${localIP}:${PORT}/health`);
-  console.log(`💻 Laptop: file:///path/to/laptop/index.html`);
+  console.log(`💻 Laptop: http://${localIP}:${PORT}/laptop`);
   console.log(`📱 Mobile: http://${localIP}:${PORT}\n`);
 });
 
