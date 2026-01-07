@@ -25,6 +25,23 @@ class RemoteScreenReceiver {
     console.log(`   Port: ${port}`);
     console.log(`   Signaling URL: ${this.signalingUrl}`);
     
+    // Immediately try to update the config display
+    const configText = document.getElementById('configText');
+    if (configText) {
+      configText.textContent = `WS: ${protocol} | Host: ${host} | Port: ${port}`;
+      console.log('✅ Config text updated');
+    } else {
+      console.error('❌ configText element not found');
+    }
+    
+    const urlField = document.getElementById('signalingUrl');
+    if (urlField) {
+      urlField.value = this.signalingUrl;
+      console.log('✅ URL field updated');
+    } else {
+      console.error('❌ signalingUrl field not found');
+    }
+    
     this.sessionId = null;
     this.peerConnection = null;
     this.signalingSocket = null;
@@ -83,23 +100,6 @@ class RemoteScreenReceiver {
    * Initialize all UI event listeners
    */
   initializeEventListeners() {
-    // Display auto-detected configuration
-    const configText = document.getElementById('configText');
-    if (configText) {
-      configText.innerHTML = `
-        🔧 Protocol: ${this.signalingUrl.split('://')[0].toUpperCase()}<br>
-        🌐 Host: ${this.signalingUrl.split('//')[1].split(':')[0]}<br>
-        🔌 Port: ${this.signalingUrl.split(':').pop()}<br>
-        📍 Full URL: ${this.signalingUrl}
-      `;
-    }
-    
-    // Pre-populate signaling URL field if empty
-    const urlField = document.getElementById('signalingUrl');
-    if (urlField && !urlField.value) {
-      urlField.value = this.signalingUrl;
-    }
-    
     // Connection setup
     this.elements.connectBtn.addEventListener('click', () => this.connect());
     this.elements.sessionIdInput.addEventListener('keypress', (e) => {
@@ -209,7 +209,8 @@ class RemoteScreenReceiver {
         this.signalingSocket.onerror = (error) => {
           console.error('❌ WebSocket ERROR:', error);
           this.log(`❌ WebSocket error: ${error.message || error}`);
-          this.showStatus('WebSocket connection failed - check console', 'error');
+          const message = `Connection failed. Server: ${this.signalingUrl}`;
+          this.showStatus(message, 'error');
           reject(new Error('WebSocket connection failed'));
         };
 
@@ -223,6 +224,7 @@ class RemoteScreenReceiver {
         setTimeout(() => {
           if (this.signalingSocket.readyState !== WebSocket.OPEN) {
             console.error('⏱️ WebSocket timeout - connection took too long');
+            this.showStatus(`Connection timeout after 10s. URL: ${this.signalingUrl}`, 'error');
             reject(new Error('Signaling connection timeout'));
           }
         }, 10000);
