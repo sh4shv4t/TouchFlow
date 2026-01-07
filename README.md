@@ -895,9 +895,9 @@ copies or substantial portions of the Software.
 
 ## Support & Contact
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/yourusername/remote-screen-controller/issues)
-- **Discussions**: [Community Q&A](https://github.com/yourusername/remote-screen-controller/discussions)
-- **Email**: support@example.com
+- **GitHub Issues**: [Report bugs and request features](https://github.com/sh4shv4t/TouchFlow/issues)
+- **Discussions**: [Community Q&A](https://github.com/sh4shv4t/TouchFlow/discussions)
+- **Email**: shashvat.k.singh.16@gmail.com
 
 ---
 
